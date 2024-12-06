@@ -1,7 +1,7 @@
 import fastifyPlugin from "fastify-plugin";
 import {FastifyInstance, FastifyReply, FastifyRequest, FastifyServerOptions} from "fastify";
 import { yearSchema } from "../schemas/year.js"
-import {find as findR, identical, map as mapR, pluck, propEq} from "ramda";
+import { pluck } from "ramda";
 
 interface YearBody {
     year: number
@@ -13,6 +13,12 @@ interface DiscoverMovie {
     release_date: string,
     vote_average: string,
 }
+
+interface EditorsById {
+    id: number
+    editors: [string]
+}
+
 interface DiscoverResponse {
     results: [DiscoverMovie]
 }

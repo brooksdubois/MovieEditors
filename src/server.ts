@@ -2,8 +2,7 @@ import appFramework from "./app";
 
 declare module 'fastify' {
     interface FastifyInstance {
-        config: { // this should be same as the confKey in options
-            // specify your typing here
+        config: {
             HTTP_PORT: number,
             HTTP_HOST: string,
             DEBUG_LEVEL: string,
