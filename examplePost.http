@@ -1,4 +1,3 @@
-### GET request to example server
 POST http://localhost:3001
 Content-Type: application/json
 
@@ -6,6 +5,3 @@ Content-Type: application/json
  "year": 2003
 }
 
-<> 2024-12-05T174825.200.json
-
-###

@@ -42,9 +42,12 @@ export default class MovieDBApiClient {
 
     fetchMovies = async (year: number) => {
         const discoverUrl = `${this.baseURL}/discover/movie?include_adult=false&include_video=false&primary_release_year=${year}&language=en-US&page=1&sort_by=popularity.desc`;
-        const discoverResponse = await fetch(discoverUrl, this.fetchOptions)
-        const discoverJson = await discoverResponse.json() as DiscoverResponse
-        return discoverJson.results
+        return await fetch(discoverUrl, this.fetchOptions)
+    }
+
+    movieFetchJson = async (discoverResponse: any) => {
+        const discoverJson = await discoverResponse?.json() as DiscoverResponse
+        return discoverJson?.results
     }
 
     fetchCrewForAllMovies = async(movieResults: DiscoverMovie[]) => {
@@ -56,7 +59,7 @@ export default class MovieDBApiClient {
         return await Promise.all(movieFetches)
     }
 
-    filterByEditors = (movieCredits: [CreditsResponse]) =>
+    filterByEditors = (movieCredits: CreditsResponse[]) =>
         movieCredits.map((it: CreditsResponse)=> {
             const editorsObjects = it.cast.filter(castMember =>
                 castMember.known_for_department === "Editing"
