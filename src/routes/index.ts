@@ -6,9 +6,9 @@ import MovieDBApiClient from "../MovieDBApiClient";
 interface YearBody {
     year: number
 }
-async function indexRoutes(server: FastifyInstance, options: FastifyServerOptions) {
 
-    server.post("/", { schema: yearSchema}, async (request: FastifyRequest, reply:FastifyReply) => {
+async function indexRoutes(server: FastifyInstance, options: FastifyServerOptions) {
+    server.post("/", { schema: yearSchema }, async (request: FastifyRequest, reply:FastifyReply) => {
         const { year } = request.body as YearBody
         const movieDBClient = new MovieDBApiClient(server.config.API_TOKEN)
         const movieResults= await movieDBClient.fetchMovies(year)

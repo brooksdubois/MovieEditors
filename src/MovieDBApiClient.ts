@@ -20,6 +20,7 @@ interface CastMember {
     name: string
     known_for_department: string
 }
+
 interface CreditsResponse {
     id: number
     cast:[CastMember]
@@ -55,7 +56,7 @@ export default class MovieDBApiClient {
         return await Promise.all(movieFetches)
     }
 
-    filterByEditors = (movieCredits: CreditsResponse[]) =>
+    filterByEditors = (movieCredits: [CreditsResponse]) =>
         movieCredits.map((it: CreditsResponse)=> {
             const editorsObjects = it.cast.filter(castMember =>
                 castMember.known_for_department === "Editing"
