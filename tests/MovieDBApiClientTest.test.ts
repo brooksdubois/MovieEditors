@@ -43,16 +43,11 @@ describe("Testing the dbAPIClient's data processing", () => {
 
         // @ts-ignore
         const result = dbApiClient.filterByEditors(movieCredits)
-        const expected = [
-            {
-                id: 1234,
-                editors: ["Brooks DuBois", "George Clooney"]
-            },
-            {
-                id: 3445,
-                editors: ["George Clooney"]
-            }
-        ]
+        const expected = {
+            1234: ["Brooks DuBois", "George Clooney"],
+            3445: ["George Clooney"]
+        }
+
         expect(result).toEqual(expected)
     });
 
@@ -71,16 +66,11 @@ describe("Testing the dbAPIClient's data processing", () => {
                 vote_average: 48.3,
             }
         ]
-        const editorsById =  [
-            {
-                id: 1234,
-                editors: ["Brooks DuBois", "George Clooney"]
-            },
-            {
-                id: 3445,
-                editors: ["George Clooney"]
-            }
-        ]
+
+        const editorsById = {
+            1234: ["Brooks DuBois", "George Clooney"],
+            3445: ["George Clooney"]
+        }
 
         // @ts-ignore
         const result = dbApiClient.mapMovieResponsesToEditors(movieResults, editorsById)

@@ -12,8 +12,7 @@ interface DiscoverResponse {
 }
 
 interface EditorsById {
-    id: number
-    editors: [string]
+    number: [string]
 }
 
 interface CastMember {
@@ -60,18 +59,19 @@ export default class MovieDBApiClient {
     }
 
     filterByEditors = (movieCredits: CreditsResponse[]) =>
-        movieCredits.map((it: CreditsResponse)=> {
+        movieCredits.reduce((acc: EditorsById, it: CreditsResponse)=> {
             const editorsObjects = it.cast.filter(castMember =>
                 castMember.known_for_department === "Editing"
             )
-            const editors = pluck("name")(editorsObjects)
-            return { id: it.id, editors } as EditorsById
-        })
+            // @ts-ignore
+            acc[it.id] = pluck("name")(editorsObjects)
+            return acc
+        }, {} as EditorsById)
 
    mapMovieResponsesToEditors = (movieResults: DiscoverMovie[], editorsById: EditorsById[]) =>
         movieResults.map((movie: DiscoverMovie) => {
             const { id, title, release_date, vote_average } = movie
-            const { editors } = editorsById.find(it => it.id == id) ?? { editors: [] }
+            const editors = editorsById[id] ?? [];
             return { title, release_date, vote_average, editors }
         })
 }
