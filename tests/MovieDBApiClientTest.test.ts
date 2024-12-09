@@ -1,8 +1,31 @@
-import MovieDBApiClient from "../src/MovieDBApiClient";
+import MovieDBApiClient, {FetchAdapter, FetchResponse} from "../src/MovieDBApiClient";
 
-const dbApiClient = new MovieDBApiClient("abcdToken")
+class StubFetchAdapter extends FetchAdapter{
+    mockResponse: object | null = null
+    urlCalledWith: string[] = []
+    optionsCalledWith: RequestInit | null = null
+
+    constructor(mockResponse: any) {
+        super();
+        this.mockResponse = mockResponse;
+    }
+
+    async fetch<T>(url: string, options?: RequestInit): Promise<FetchResponse<T>> {
+        this.urlCalledWith.push(url)
+        this.optionsCalledWith = options ?? null
+        return {
+            ok: true,
+            status: 200,
+            json: async () => this.mockResponse as T,
+            text: async () => JSON.stringify(this.mockResponse),
+        };
+    }
+}
+
+
 
 describe("Testing the dbAPIClient's data processing", () => {
+    const dbApiClient = new MovieDBApiClient("abcdToken", new StubFetchAdapter({}))
     test('it filters editors by the editor key in the response', () => {
         const movieCredits = [
             {
@@ -94,29 +117,41 @@ describe("Testing the dbAPIClient's data processing", () => {
 })
 
 describe("Testing the dpApiClient's fetches", () => {
-    let fetchMock: any = undefined;
-
-    beforeEach(() => {
-        fetchMock = jest.spyOn(global, "fetch").mockImplementation();
-    });
-
-    afterEach(() => {
-        jest.restoreAllMocks();
-    });
 
     test('fetch has been called with the correct year and tokens', () => {
-        dbApiClient.fetchMovies(2003)
-        expect(fetchMock).toHaveBeenCalled();
+        const year = 2003
+        const fetchStub = new StubFetchAdapter({})
+        const dbApiClient = new MovieDBApiClient("abcdToken", fetchStub)
+        dbApiClient.fetchMovies(year)
         const headers = {"headers": {"Authorization": "Bearer abcdToken", "accept": "application/json"}, "method": "GET"}
-        const expectedURL = `${dbApiClient.baseURL}/discover/movie?include_adult=false&include_video=false&primary_release_year=2003&language=en-US&page=1&sort_by=popularity.desc`
-        expect(fetchMock).toHaveBeenCalledWith(expectedURL, headers);
+        const expectedURL = `${dbApiClient.baseURL}/discover/movie?include_adult=false&include_video=false&primary_release_year=${year}&language=en-US&page=1&sort_by=popularity.desc`
+        expect(fetchStub.urlCalledWith).toContain(expectedURL);
+        expect(fetchStub.optionsCalledWith).toEqual(headers)
     });
 
-    test('fetch has been called multiple times for movies', () => {
-        dbApiClient.fetchMovies(2003)
-        expect(fetchMock).toHaveBeenCalled();
+    test('fetch has been called multiple times for all movies', () => {
+        const movieResults = [
+            {
+                id: 122,
+                title: "The Lord of the Rings: The Return of the King",
+                release_date: "",
+                vote_average: ""
+            },
+            {
+                id: 22,
+                title: "Pirates of the Caribbean: The Curse of the Black Pearl",
+                release_date: "",
+                vote_average: ""
+            }
+        ]
+        const fetchStub = new StubFetchAdapter({})
+        const dbApiClient = new MovieDBApiClient("abcdToken", fetchStub)
+        dbApiClient.fetchCrewForAllMovies(movieResults)
         const headers = {"headers": {"Authorization": "Bearer abcdToken", "accept": "application/json"}, "method": "GET"}
-        const expectedURL = `${dbApiClient.baseURL}/discover/movie?include_adult=false&include_video=false&primary_release_year=2003&language=en-US&page=1&sort_by=popularity.desc`
-        expect(fetchMock).toHaveBeenCalledWith(expectedURL, headers);
+        const expectedURL1 = `${dbApiClient.baseURL}/movie/122/credits`
+        const expectedURL2 = `${dbApiClient.baseURL}/movie/22/credits`
+        expect(fetchStub.urlCalledWith).toContain(expectedURL1);
+        expect(fetchStub.urlCalledWith).toContain(expectedURL2);
+        expect(fetchStub.optionsCalledWith).toEqual(headers)
     });
 })
