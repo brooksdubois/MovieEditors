@@ -1,28 +1,5 @@
-import MovieDBApiClient, {FetchAdapter, FetchResponse} from "../src/MovieDBApiClient";
-
-class StubFetchAdapter extends FetchAdapter{
-    mockResponse: object | null = null
-    urlCalledWith: string[] = []
-    optionsCalledWith: RequestInit | null = null
-
-    constructor(mockResponse: any) {
-        super();
-        this.mockResponse = mockResponse;
-    }
-
-    async fetch<T>(url: string, options?: RequestInit): Promise<FetchResponse<T>> {
-        this.urlCalledWith.push(url)
-        this.optionsCalledWith = options ?? null
-        return {
-            ok: true,
-            status: 200,
-            json: async () => this.mockResponse as T,
-            text: async () => JSON.stringify(this.mockResponse),
-        };
-    }
-}
-
-
+import MovieDBApiClient from "../src/MovieDBApiClient";
+import { StubFetchAdapter } from "./StubFetchAdapter";
 
 describe("Testing the dbAPIClient's data processing", () => {
     const dbApiClient = new MovieDBApiClient("abcdToken", new StubFetchAdapter({}))
@@ -63,7 +40,6 @@ describe("Testing the dbAPIClient's data processing", () => {
                 ]
             }
         ]
-
         // @ts-ignore
         const result = dbApiClient.filterByEditors(movieCredits)
         const expected = {
@@ -114,20 +90,17 @@ describe("Testing the dbAPIClient's data processing", () => {
 
         expect(result).toEqual(expected)
     });
-})
 
-describe("Testing the dpApiClient's fetches", () => {
-
-    test('fetch has been called with the correct year and tokens', () => {
-        const year = 2003
-        const fetchStub = new StubFetchAdapter({})
-        const dbApiClient = new MovieDBApiClient("abcdToken", fetchStub)
-        dbApiClient.fetchMovies(year)
-        const headers = {"headers": {"Authorization": "Bearer abcdToken", "accept": "application/json"}, "method": "GET"}
-        const expectedURL = `${dbApiClient.baseURL}/discover/movie?include_adult=false&include_video=false&primary_release_year=${year}&language=en-US&page=1&sort_by=popularity.desc`
-        expect(fetchStub.urlCalledWith).toContain(expectedURL);
-        expect(fetchStub.optionsCalledWith).toEqual(headers)
-    });
+        test('fetch has been called with the correct year and tokens', () => {
+            const year = 2003
+            const fetchStub = new StubFetchAdapter({})
+            const dbApiClient = new MovieDBApiClient("abcdToken", fetchStub)
+            dbApiClient.fetchMovies(year)
+            const headers = {"headers": {"Authorization": "Bearer abcdToken", "accept": "application/json"}, "method": "GET"}
+            const expectedURL = `${dbApiClient.baseURL}/discover/movie?include_adult=false&include_video=false&primary_release_year=${year}&language=en-US&page=1&sort_by=popularity.desc`
+            expect(fetchStub.urlCalledWith).toContain(expectedURL);
+            expect(fetchStub.optionsCalledWith).toEqual(headers)
+        });
 
     test('fetch has been called multiple times for all movies', () => {
         const movieResults = [

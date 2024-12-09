@@ -1,4 +1,5 @@
 import {pluck} from "ramda";
+import {FetchAdapter} from "./FetchAdapter";
 
 interface DiscoverMovie {
     id: number,
@@ -11,9 +12,7 @@ interface DiscoverResponse {
     results: [DiscoverMovie]
 }
 
-interface EditorsById {
-    number: [string]
-}
+type EditorsById = {[key: number]: string[]};
 
 interface CastMember {
     name: string
@@ -25,28 +24,12 @@ interface CreditsResponse {
     cast:[CastMember]
 }
 
-export interface FetchResponse<T = any> {
-    ok: boolean;
-    status: number;
-    json: () => Promise<T>;
-    text: () => Promise<string>;
-}
-
-
-export class FetchAdapter {
-    constructor() {}
-
-    async fetch<T>(url: string, options?: RequestInit): Promise<FetchResponse<T>> {
-        const response = await fetch(url, options);
-        return response as FetchResponse<T>;
-    }
-}
-
 export default class MovieDBApiClient {
-    fetchOptions: object
+    fetchOptions = {}
     baseURL = "https://api.themoviedb.org/3"
     fetchAdapter: FetchAdapter = new FetchAdapter()
-    constructor(apiKey: string, fetchAdapter: FetchAdapter) {
+
+    constructor(apiKey?: string | null, fetchAdapter?: FetchAdapter | null) {
         this.fetchOptions = {
             method: 'GET',
             headers: {
@@ -54,7 +37,7 @@ export default class MovieDBApiClient {
                 Authorization: 'Bearer ' + apiKey
             }
         };
-        this.fetchAdapter = fetchAdapter
+        if(fetchAdapter) this.fetchAdapter = fetchAdapter
     }
 
     fetchMovies = async (year: number) => {
@@ -78,7 +61,6 @@ export default class MovieDBApiClient {
             const editorsObjects = it.cast.filter(castMember =>
                 castMember.known_for_department === "Editing"
             )
-            // @ts-ignore
             acc[it.id] = pluck("name")(editorsObjects)
             return acc
         }, {} as EditorsById)
@@ -86,7 +68,6 @@ export default class MovieDBApiClient {
    mapMovieResponsesToEditors = (movieResults: DiscoverMovie[], editorsById: EditorsById) =>
         movieResults.map((movie: DiscoverMovie) => {
             const { id, title, release_date, vote_average } = movie
-            // @ts-ignore
             const editors = editorsById[id] ?? [];
             return { title, release_date, vote_average, editors }
         })

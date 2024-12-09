@@ -11,7 +11,7 @@ declare module 'fastify' {
     }
 }
 
-async function initAppServer() {
+export async function initAppServer() {
     // Trigger the application framework to load
     const app = await appFramework();
 
@@ -26,4 +26,5 @@ async function initAppServer() {
         process.exit(1);
     }
 }
-initAppServer()
+
+initAppServer().then(r => { console.log("End") })
