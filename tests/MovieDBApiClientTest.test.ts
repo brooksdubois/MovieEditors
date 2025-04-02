@@ -1,5 +1,5 @@
 import MovieDBApiClient from "../src/MovieDBApiClient";
-import { StubFetchAdapter } from "./StubFetchAdapter";
+import {StubFetchAdapter} from "./StubFetchAdapter";
 
 describe("Testing the dbAPIClient's data processing", () => {
     const dbApiClient = new MovieDBApiClient("abcdToken", new StubFetchAdapter({}))

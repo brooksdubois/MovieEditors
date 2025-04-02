@@ -6,9 +6,9 @@
     "moduleResolution": "node",
     "resolveJsonModule": true,
     "outDir": "./dist",
-    "rootDir": "./src",
+    "rootDir": "./",
     "types": ["jest", "node"]
   },
-  "include": ["src"],
+  "include": ["src", "tests", "**/*.ts"],
   "exclude": ["node_modules", "dist"]
 }
